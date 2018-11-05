@@ -1,10 +1,12 @@
 package com.alyona.smail.api
 
+import com.alyona.smail.model.ThreadsListResponse
 import retrofit2.Call
 import retrofit2.http.GET
+import retrofit2.http.Path
 
 interface ApiInterface {
-    @GET("me/threads")
-    fun getThreads(): Call<String>
+    @GET("{id}/threads")
+    fun getThreads(@Path("id") id: String): Call<ThreadsListResponse>
 
 }

@@ -1,5 +1,8 @@
 package com.alyona.smail.api
 
+import com.alyona.smail.constants.BASE_URL
+import com.alyona.smail.constants.CONNECT_TIMEOUT
+import com.alyona.smail.constants.READ_TIMEOUT
 import com.google.android.gms.common.api.Api
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -8,8 +11,7 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
 object RetrofitService {
-    private const val CONNECT_TIMEOUT: Long = 30
-    private const val READ_TIMEOUT: Long = 30
+
 
     fun getApi(): ApiInterface = getInstance(debugClientBuilder())
 
@@ -31,7 +33,7 @@ object RetrofitService {
 
     private fun getInstance(debugClientBuilder: OkHttpClient.Builder): ApiInterface {
         return Retrofit.Builder()
-            .baseUrl("https://www.googleapis.com/gmail/v1/users/")
+            .baseUrl(BASE_URL)
             .client(debugClientBuilder.build())
             .addConverterFactory(GsonConverterFactory.create())
             .build()
