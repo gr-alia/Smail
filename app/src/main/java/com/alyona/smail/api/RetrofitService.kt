@@ -4,6 +4,7 @@ import com.alyona.smail.constants.BASE_URL
 import com.alyona.smail.constants.CONNECT_TIMEOUT
 import com.alyona.smail.constants.READ_TIMEOUT
 import com.google.android.gms.common.api.Api
+import com.jakewharton.retrofit2.adapter.kotlin.coroutines.CoroutineCallAdapterFactory
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
@@ -36,6 +37,7 @@ object RetrofitService {
             .baseUrl(BASE_URL)
             .client(debugClientBuilder.build())
             .addConverterFactory(GsonConverterFactory.create())
+            .addCallAdapterFactory(CoroutineCallAdapterFactory())
             .build()
             .create(ApiInterface::class.java)
     }

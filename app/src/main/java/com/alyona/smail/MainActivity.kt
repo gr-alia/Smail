@@ -5,24 +5,22 @@ import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import com.alyona.smail.api.RetrofitService
-import com.alyona.smail.constants.GMAIL_SCOPE
-import com.alyona.smail.model.ThreadsListResponse
+import com.alyona.smail.model.Thread
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.Scopes
 import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.Scope
 import com.google.android.gms.tasks.Task
 import kotlinx.android.synthetic.main.activity_main.*
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import kotlinx.coroutines.*
 
 class MainActivity : AppCompatActivity() {
     private val RC_SIGN_IN: Int = 101
     private var googleSignInClient: GoogleSignInClient? = null
+    private var myJob: Job? = null
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,6 +40,10 @@ class MainActivity : AppCompatActivity() {
         Log.d("Kot", if (account != null) "User exists" else "User doesnt exist")
     }
 
+    override fun onDestroy() {
+        myJob?.cancel()
+        super.onDestroy()
+    }
 
     private fun signIn() {
         val signInIntent = googleSignInClient?.signInIntent
@@ -61,21 +63,16 @@ class MainActivity : AppCompatActivity() {
         try {
             val account = completedTask?.getResult(ApiException::class.java)
             var id = "me"
-            if (account != null){
+            if (account != null) {
                 id = account.id ?: "me"
             }
 
-            RetrofitService.getApi().getThreads(id).enqueue(object : Callback<ThreadsListResponse> {
-                override fun onResponse(call: Call<ThreadsListResponse>, response: Response<ThreadsListResponse>) {
-                    if (response.isSuccessful) {
-                        response.body()?.threads
-                    }
+            myJob = CoroutineScope(Dispatchers.IO).launch {
+                val result = getThreads(id)
+                withContext(Dispatchers.Default) {
+                    //do something with result
                 }
-
-                override fun onFailure(call: Call<ThreadsListResponse>, t: Throwable) {
-
-                }
-            })
+            }
 
 
             // Signed in successfully, show authenticated UI.
@@ -86,6 +83,11 @@ class MainActivity : AppCompatActivity() {
             Log.w("Kot", "signInResult:failed code=" + e.statusCode)
             // updateUI(null)
         }
+
+    }
+
+    private suspend fun getThreads(userId: String): ArrayList<Thread> {
+        return RetrofitService.getApi().getThreads(userId).await().threads
 
     }
 }
